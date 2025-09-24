@@ -70,7 +70,7 @@ export class  Service{
         }
       }
 
-      async getPosts() {
+      async getPost() {
         try {
           return await this.databases.getDocuments(
             config.appwriteDatabaseId,
@@ -84,8 +84,46 @@ export class  Service{
         } 
       }
     
-      async getPosts(Queries = [Query.equal("status", "published")]) {
+      async getPosts(Queries = [Query.equal("status", "active")]) {
+          try {
+               return await this.databases.listDocuments(
+                config.appwriteDatabaseId,
+                config.appwriteCollectionId,
+                Queries
+               ); 
+          }catch{
+            console.error("Get Posts Error:", error);
+            throw error;
+          }
+      }
 
+      // File upload
+      async uploadFile(file) {
+        try {
+          return await this.bucket.createFile(
+            config.appwriteBucketId,
+            ID.unique(),
+            file
+          );
+          return fileUploaded.$id; // Return the file ID
+        } catch (error) {
+          console.error("File Upload Error:", error);
+          return false;
+        }
+      }
+
+        async deleteFile(fileId) {
+        try {
+          await this.bucket.deleteFile(config.appwriteBucketId, fileId);
+          return true;
+        } catch (error) {
+          console.error("File Deletion Error:", error);
+          return false;
+        }   
+      }
+
+      getFilePreview(fileId) {
+        return this.bucket.getFilePreview(config.appwriteBucketId, fileId);
       }
 }
 
